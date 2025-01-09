@@ -117,7 +117,7 @@ export class LoginComponent {
         this.loading = true; // Show loading spinner
 
         // Simulate sending OTP
-        this.http.get('http://localhost:5000/sendotp').subscribe(
+        this.http.get(`http://localhost:5000/sendotp?mobile=${mobile}`).subscribe(
           (response) => {
             console.log(response)
             this.loading = false; // Hide spinner
