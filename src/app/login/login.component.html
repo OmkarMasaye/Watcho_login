@@ -1,0 +1,229 @@
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <mat-card class="login-card">
+      <form *ngIf="isLoginMode; else signupTemplate" #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)">
+        <h2 class="text-center mat-title">Login</h2>
+      
+        <!-- Email Field -->
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Mobile Number</mat-label>
+            <input 
+              matInput 
+              type="tel" 
+              name="mobile" 
+              ngModel 
+              required 
+              pattern="^[0-9]{10}$" 
+              placeholder="Enter your mobile number" 
+              #mobile="ngModel"
+            >
+            <mat-error *ngIf="mobile.errors?.['required'] && mobile.touched">
+              Mobile number is required.
+            </mat-error>
+            <mat-error *ngIf="mobile.errors?.['pattern'] && mobile.touched">
+              Please enter a valid 10-digit mobile number.
+            </mat-error>
+          </mat-form-field>
+          
+      
+        <!-- Password Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input 
+            matInput 
+            [type]="showLoginPassword ? 'text' : 'password'" 
+            name="password" 
+            ngModel 
+            required 
+            placeholder="Enter your password"
+          >
+          <button mat-icon-button matSuffix (click)="toggleLoginPasswordVisibility()" type="button" tabindex="-1">
+            <mat-icon>{{ showLoginPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+        </mat-form-field>
+      
+        <!-- Error Message -->
+        <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+      
+        <!-- Submit Button -->
+        <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="loginForm.invalid">
+          Login
+        </button>
+      
+        <!-- Toggle to Sign Up -->
+        <p class="text-center mt-2">
+          Don't have an account? 
+          <a href="javascript:void(0)" (click)="toggleMode()" class="link-primary">Sign Up</a>
+        </p>
+      
+        <!-- Loader -->
+        <div *ngIf="loading" class="loader-container">
+          <div class="loader"></div>
+          <div class="loader-text">Loading...</div>
+        </div>
+      </form>
+      
+  
+      <ng-template #signupTemplate>
+        
+        <form #signupForm="ngForm" (ngSubmit)="onSignup(signupForm)">
+          <h2 class="text-center mat-title">Sign Up</h2>
+          
+          <!-- Name Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Name</mat-label>
+            <input matInput type="text" name="name" ngModel required placeholder="Enter your name" #name="ngModel">
+            <mat-error *ngIf="name.errors?.['required'] && name.touched">Name is required.</mat-error>
+          </mat-form-field>
+          
+          <!-- Email Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" name="email" ngModel required email placeholder="Enter your email" #email="ngModel">
+            <mat-error *ngIf="email.errors?.['required'] && email.touched">Email is required.</mat-error>
+            <mat-error *ngIf="email.errors?.['email'] && email.touched">Please enter a valid email address.</mat-error>
+          </mat-form-field>
+          
+          <!-- Mobile Number Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Mobile Number</mat-label>
+            <input
+              matInput
+              type="tel"
+              name="mobile"
+              ngModel
+              required
+              pattern="^[6-9][0-9]{9}$"
+              placeholder="Enter your mobile number"
+              #mobile="ngModel"
+            >
+            <mat-error *ngIf="mobile.errors?.['required'] && mobile.touched">Mobile number is required.</mat-error>
+            <mat-error *ngIf="mobile.errors?.['pattern'] && mobile.touched">
+              Please enter a valid 10-digit mobile number starting with 6-9.
+            </mat-error>
+          </mat-form-field>
+          
+
+          <!-- Gender Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Gender</mat-label>
+            <mat-select name="gender" ngModel required #gender="ngModel">
+              <mat-option value="male">Male</mat-option>
+              <mat-option value="female">Female</mat-option>
+              <mat-option value="other">Other</mat-option>
+            </mat-select>
+            <mat-error *ngIf="gender.errors?.['required'] && gender.touched">Gender is required.</mat-error>
+          </mat-form-field>
+          
+          <!-- Pincode Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Pincode</mat-label>
+            <input
+              matInput
+              type="text"
+              name="pincode"
+              ngModel
+              required
+              minlength="6"
+              maxlength="6"
+              pattern="^[0-9]*$"
+              placeholder="Enter your pincode"
+              #pincode="ngModel"
+            />
+            <mat-error *ngIf="pincode.errors?.['required'] && pincode.touched">Pincode is required.</mat-error>
+            <mat-error *ngIf="pincode.errors?.['minlength'] && pincode.touched">Pincode must be 6 digits.</mat-error>
+            <mat-error *ngIf="pincode.errors?.['maxlength'] && pincode.touched">Pincode must be 6 digits.</mat-error>
+            <mat-error *ngIf="pincode.errors?.['pattern'] && pincode.touched">Pincode must contain only numbers.</mat-error>
+          </mat-form-field>
+          
+          <!-- City Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>City</mat-label>
+            <input
+              matInput
+              type="text"
+              name="city"
+              ngModel
+              required
+              placeholder="Enter your city"
+              #city="ngModel"
+            />
+            <mat-error *ngIf="city.errors?.['required'] && city.touched">City is required.</mat-error>
+          </mat-form-field>
+                    
+          <!-- Password Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <input
+              matInput
+              [type]="showSignupPassword ? 'text' : 'password'"
+              name="password"
+              ngModel
+              required
+              placeholder="Enter your password"
+              #password="ngModel"
+            >
+            <mat-error *ngIf="password.errors?.['required'] && password.touched">Password is required.</mat-error>
+            <button mat-icon-button matSuffix (click)="toggleSignupPasswordVisibility()" type="button" tabindex="-1">
+              <mat-icon>{{ showSignupPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+          </mat-form-field>
+          
+          <!-- Confirm Password Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Re-enter Password</mat-label>
+            <input
+              matInput
+              [type]="showSignupConfirmPassword ? 'text' : 'password'"
+              name="confirmPassword"
+              ngModel
+              required
+              placeholder="Re-enter your password"
+              #confirmPassword="ngModel"
+            >
+            <mat-error *ngIf="confirmPassword.errors?.['required'] && confirmPassword.touched">Confirmation password is required.</mat-error>
+            <button mat-icon-button matSuffix (click)="toggleSignupConfirmPasswordVisibility()" type="button" tabindex="-1">
+              <mat-icon>{{ showSignupConfirmPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+          </mat-form-field>
+          
+          <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="signupForm.invalid">Sign Up</button>
+          
+          <p class="text-center mt-2">
+            Already have an account? 
+            <a href="javascript:void(0)" (click)="toggleMode()" class="link-primary">Login</a>
+          </p>
+        </form>
+
+        <ng-container *ngIf="showOtpCard">
+          <!-- Background Overlay -->
+          <div class="modal-overlay"></div>
+        
+          <!-- OTP Verification Card -->
+          <div class="otp-card">
+            <h2 class="text-center">Enter OTP</h2>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>OTP</mat-label>
+              <input matInput type="text" [(ngModel)]="otp" name="otp" required placeholder="Enter the OTP" />
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="verifyOtp()" class="full-width">Verify</button>
+          </div>
+        </ng-container>
+        
+        
+        
+  
+        <div class="modal-overlay" *ngIf="showSuccessModal">
+          <div class="modal-content">
+            <h2>Signup Successful</h2>
+            <p>You have successfully signed up!</p>
+            <button (click)="redirectToLogin()">OK</button>
+          </div>
+        </div>
+        <div  *ngIf="loading" class="loader-container">
+          <div class="loader"></div>
+          <div class="loader-text">Loading...</div>
+        </div>
+      </ng-template>
+    </mat-card>
+  </div>
+  

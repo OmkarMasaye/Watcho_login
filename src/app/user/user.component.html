@@ -1,0 +1,155 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow">
+    <div class="container-fluid">
+      <!-- Company Name -->
+      <a class="navbar-brand d-flex align-items-center" routerLink="/layout/dashboard">
+        <i class="bi bi-building fs-4 me-2"></i> Rescale
+      </a>
+  
+      <!-- Navigation Links -->
+  
+  
+      <!-- User Info -->
+      <div class="d-flex align-items-center ms-auto user-info dropdown">
+        <button
+          class="btn btn-light dropdown-toggle d-flex align-items-center"
+          type="button"
+          id="dropdownMenuButton"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <div
+            class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+            style="width: 40px; height: 40px;"
+          >
+            {{ initials }}
+          </div>
+          <span class="username">{{ username }}</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+          <li class="dropdown-header">
+            <div class="d-flex align-items-center">
+              <div
+                class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                style="width: 40px; height: 40px;"
+              >
+                {{ initials }}
+              </div>
+              <div>
+                <div class="username">{{ username }}</div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Profile Settings</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#"><i class="bi bi-question-circle"></i> Help Center</a>
+          </li>
+         
+          <li>
+            <a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+ 
+
+  <div class="card-container">
+    <!-- Allocated Leads Card -->
+    <div class="card">
+      <!-- <div class="card-header"></div> -->
+      <div class="card-content">
+        <h3>Allocated Leads</h3>
+        <h2><strong>{{ allocatedLeadsCount }}</strong></h2>
+      </div>
+    </div>
+  
+    <!-- Leads Remaining Card -->
+    <!-- <div class="card">
+      <div class="card-header"></div>
+      <div class="card-content">
+        <h3>Leads Remaining</h3>
+        
+      </div>
+    </div> -->
+  </div>
+  
+
+
+    <mat-table [dataSource]="dataSource" matSort class="custom-table mat-elevation-z8">
+      <!-- Order ID Column -->
+      <ng-container matColumnDef="orderId">
+        <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <button
+  mat-raised-button
+  [color]="element.paymentStatus === 'Paid' ? 'primary' : 'accent'"
+  [disabled]="element.paymentStatus === 'Paid'"
+  matTooltip="{{ element.paymentStatus === 'Paid' ? 'Already Paid' : 'Click to Pay' }}"
+  (click)="updatePaymentStatus(element)"
+>
+  <a *ngIf="element.link" [href]="element.link" target="_blank" style="color: inherit; text-decoration: none;">
+    Pay
+  </a>
+</button>
+        </mat-cell>
+      </ng-container>
+
+    
+      <!-- Link Column
+      <ng-container matColumnDef="link">
+        <mat-header-cell *matHeaderCellDef>Link</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <a [href]="element.link" target="_blank">{{ element.link || "N/A" }}</a>
+        </mat-cell>
+      </ng-container> -->
+    
+      <!-- Payment Status Column -->
+      <ng-container matColumnDef="paymentStatus">
+        <mat-header-cell *matHeaderCellDef>Payment Status</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <mat-select [(value)]="element.paymentStatus">
+            <mat-option value="Paid">Paid</mat-option>
+            <mat-option value="Unpaid">Unpaid</mat-option>
+          </mat-select>
+        </mat-cell>
+      </ng-container>
+    
+      <!-- Payment Mode Column -->
+      <!-- <ng-container matColumnDef="paymentMode">
+        <mat-header-cell *matHeaderCellDef>Payment Mode</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <mat-select [(value)]="element.paymentMode">
+            <mat-option *ngFor="let mode of paymentModes" [value]="mode">{{ mode }}</mat-option>
+          </mat-select>
+        </mat-cell>
+      </ng-container> -->
+      <ng-container matColumnDef="undo">
+        <mat-header-cell *matHeaderCellDef>Undo</mat-header-cell>
+        <mat-cell *matCellDef="let element" class="undo-cell">
+          <button mat-icon-button (click)="undoPaymentStatus(element)" [disabled]="element.paymentStatus !== 'Paid'">
+            <i class="fas fa-undo-alt"></i>
+          </button>
+        </mat-cell>
+      </ng-container>
+      
+      
+      
+      
+      <!-- Allocation Date Column -->
+      <ng-container matColumnDef="allocationDate">
+        <mat-header-cell *matHeaderCellDef>Allocation Date</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.allocationDate || "N/A" }}</mat-cell>
+      </ng-container>
+    
+      <!-- Allocation Time Column -->
+      <ng-container matColumnDef="allocationTime">
+        <mat-header-cell *matHeaderCellDef>Allocation Time</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.allocationTime || "N/A" }}</mat-cell>
+      </ng-container>
+    
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+  

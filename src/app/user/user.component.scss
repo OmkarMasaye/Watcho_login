@@ -1,0 +1,214 @@
+.navbar {
+    padding: 1rem;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #333;
+  
+      &:hover {
+        color: #0d6efd;
+        text-decoration: none;
+      }
+    }
+  
+   
+  
+    .user-info {
+      .username {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #333;
+  
+        &:hover {
+          color: #0d6efd;
+        }
+      }
+  
+      .dropdown-menu {
+        min-width: 250px;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+ .container{
+    display: flex;
+    flex-direction: row;
+    max-width: fit-content;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    
+ }
+
+  
+ 
+
+  .custom-table {
+    margin: 0; /* Remove extra margins */
+    width: 100%; /* Default width for smaller screens */
+    min-width: 600px; /* Ensure a minimum width for usability */
+    max-width: 100%; /* Prevent exceeding the container size */
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 8px;
+    // box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a shadow */
+    overflow: hidden;
+
+    mat-header-cell {
+      font-weight: bold;
+      background-color: #007bff;
+      color: white;
+      padding: 8px; /* Compact padding */
+      text-align: center !important; /* Center the header text */
+      vertical-align: middle !important;
+         font-size: 14px; /* Adjust font size for responsiveness */
+      border-bottom: 2px solid #e1e1e1;
+    }
+
+    mat-cell {
+      padding: 8px; /* Compact padding */
+      text-align: left;
+      font-size: 14px; /* Adjust font size */
+      border-bottom: 1px solid #e1e1e1;
+      white-space: nowrap; /* Prevent text wrapping */
+    }
+
+    mat-row:nth-child(even) {
+      background-color: #f1f9fc;
+    }
+
+    mat-row:hover {
+      background-color: #e0f7fa;
+    }
+    .undo-cell {
+      text-align: center; /* Center the content horizontally */
+      vertical-align: middle; /* Center the content vertically */
+    }
+    button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: auto; /* Ensure proper alignment */
+    }
+  
+  }
+
+  /* Media query for desktop screens */
+  @media (min-width: 1024px) {
+    .custom-table {
+      width: 70%; /* Table takes up to 70% of the screen width */
+      max-width: 70%; /* Ensure it doesn't exceed 70% */
+      margin: 0 auto; /* Center the table on larger screens */
+    }
+  }
+
+  /* Media query for smaller screens */
+  @media (max-width: 768px) {
+    .custom-table {
+      width: auto; /* Let the table adjust dynamically */
+      max-width: 90%; /* Restrict table width on mobile */
+      min-width: 80%; /* Allow smaller minimum width */
+      font-size: 12px; /* Adjust font size for smaller screens */
+      margin: 0 auto; /* Center the table on mobile screens */
+
+    }
+
+    mat-header-cell,
+    mat-cell {
+      padding: 6px; /* Reduce padding for smaller screens */
+    }
+  }
+
+
+
+.disabled {
+  pointer-events: none;
+  color: gray;
+  text-decoration: none;
+}
+/* Container for the Cards */
+.card-container {
+  display: flex;
+  justify-content: center; /* Center the cards horizontally */
+  gap: 24px; /* Space between cards */
+  padding: 16px;
+  flex-wrap: nowrap; /* Prevent cards from wrapping, even on mobile screens */
+}
+
+/* General Card Styling */
+.card {
+  background-color: #ffffff; /* White background */
+  border-radius: 50%; /* Make cards spherical */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  width: 200px; /* Fixed width for cards */
+  height: 200px; /* Fixed height for spherical shape */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+
+  &:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+  }
+
+  /* Header Strip */
+  .card-header {
+    background-color: #007bff; /* Blue strip */
+    height: 10px; /* Height of the strip */
+    width: 80%; /* Adjust width for circular design */
+    margin-bottom: 8px;
+  }
+
+  /* Card Content */
+  .card-content {
+    text-align: center;
+
+    h3 {
+      color: #007bff; /* Title in blue */
+      font-size: 16px; /* Adjusted title font size */
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 4px 0; /* Spacing between paragraphs */
+      color: #333; /* Dark text color */
+      font-size: 14px; /* Text font size */
+    }
+
+    strong {
+      color: #000; /* Bold text color */
+    }
+  }
+}
+
+/* Responsive Design for All Screens */
+@media (max-width: 768px) {
+  .card-container {
+    flex-wrap: nowrap; /* Cards remain side-by-side even on small screens */
+    gap: 16px; /* Reduce gap between cards */
+  }
+
+  .card {
+    width: 160px; /* Adjust width for smaller screens */
+    height: 160px; /* Adjust height for circular design */
+    .card-content {
+      h3 {
+        font-size: 14px; /* Smaller title font size */
+      }
+      p {
+        font-size: 12px; /* Smaller text font size */
+      }
+    }
+  }
+}
