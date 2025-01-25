@@ -1,155 +1,204 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow">
-    <div class="container-fluid">
-      <!-- Company Name -->
-      <a class="navbar-brand d-flex align-items-center" routerLink="/layout/dashboard">
-        <i class="bi bi-building fs-4 me-2"></i> Rescale
-      </a>
-  
-      <!-- Navigation Links -->
-  
-  
-      <!-- User Info -->
-      <div class="d-flex align-items-center ms-auto user-info dropdown">
-        <button
-          class="btn btn-light dropdown-toggle d-flex align-items-center"
-          type="button"
-          id="dropdownMenuButton"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
+  <div class="container-fluid">
+    <!-- Company Name -->
+    <a class="navbar-brand d-flex align-items-center" routerLink="/layout/dashboard">
+      <i class="bi bi-building fs-4 me-2"></i> Rescale
+    </a>
+
+    <!-- Navigation Links -->
+
+
+    <!-- User Info -->
+    <div class="d-flex align-items-center ms-auto user-info dropdown">
+      <button
+        class="btn btn-light dropdown-toggle d-flex align-items-center"
+        type="button"
+        id="dropdownMenuButton"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        <div
+          class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+          style="width: 40px; height: 40px;"
         >
-          <div
-            class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
-            style="width: 40px; height: 40px;"
-          >
-            {{ initials }}
-          </div>
-          <span class="username">{{ username }}</span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-          <li class="dropdown-header">
-            <div class="d-flex align-items-center">
-              <div
-                class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
-                style="width: 40px; height: 40px;"
-              >
-                {{ initials }}
-              </div>
-              <div>
-                <div class="username">{{ username }}</div>
-              </div>
+          {{ initials }}
+        </div>
+        <span class="username">{{ username }}</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+        <li class="dropdown-header">
+          <div class="d-flex align-items-center">
+            <div
+              class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+              style="width: 40px; height: 40px;"
+            >
+              {{ initials }}
             </div>
-          </li>
-          <li>
-            <a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Profile Settings</a>
-          </li>
-          <li>
-            <a class="dropdown-item" href="#"><i class="bi bi-question-circle"></i> Help Center</a>
-          </li>
-         
-          <li>
-            <a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
-          </li>
-        </ul>
-      </div>
+            <div>
+              <div class="username">{{ username }}</div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <a class="dropdown-item" (click)="openChangePasswordModal()"><i class="bi bi-gear"></i> Change Password</a>
+        </li>
+        <li>
+          <a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+        </li>
+      </ul>
     </div>
-  </nav>
- 
-
-  <div class="card-container">
-    <!-- Allocated Leads Card -->
-    <div class="card">
-      <!-- <div class="card-header"></div> -->
-      <div class="card-content">
-        <h3>Allocated Leads</h3>
-        <h2><strong>{{ allocatedLeadsCount }}</strong></h2>
-      </div>
-    </div>
-  
-    <!-- Leads Remaining Card -->
-    <!-- <div class="card">
-      <div class="card-header"></div>
-      <div class="card-content">
-        <h3>Leads Remaining</h3>
-        
-      </div>
-    </div> -->
   </div>
-  
+</nav>
 
 
-    <mat-table [dataSource]="dataSource" matSort class="custom-table mat-elevation-z8">
-      <!-- Order ID Column -->
-      <ng-container matColumnDef="orderId">
-        <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <button
-  mat-raised-button
-  [color]="element.paymentStatus === 'Paid' ? 'primary' : 'accent'"
-  [disabled]="element.paymentStatus === 'Paid'"
-  matTooltip="{{ element.paymentStatus === 'Paid' ? 'Already Paid' : 'Click to Pay' }}"
-  (click)="updatePaymentStatus(element)"
->
-  <a *ngIf="element.link" [href]="element.link" target="_blank" style="color: inherit; text-decoration: none;">
-    Pay
-  </a>
-</button>
-        </mat-cell>
-      </ng-container>
+<div class="change-password-overlay" *ngIf="isChangePasswordModalOpen">
+  <div class="change-password-modal-card">
+    <h3 class="modal-title">Change Password</h3>
+    <form [formGroup]="changePasswordForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="newPassword" class="form-label">New Password</label>
+        <div class="password-input-wrapper">
+          <input 
+            id="newPassword" 
+            [type]="newPasswordVisible ? 'text' : 'password'" 
+            formControlName="newPassword" 
+            placeholder="Enter new password" 
+            class="form-input" 
+          />
+          <i 
+            class="bi bi-eye password-icon" 
+            (click)="togglePasswordVisibility('newPassword')" 
+            [class.active]="newPasswordVisible"
+          ></i>
+        </div>
+        <!-- Default note for password requirements -->
+        <div class="password-note">
+          <small>
+            Password must be 6-12 characters long, include at least one letter, one number, 
+            and one special character.
+          </small>
+        </div>
+      </div>
+      <button type="submit" [disabled]="changePasswordForm.invalid" class="form-submit-btn">Submit</button>
+      <button type="button" (click)="closeChangePasswordModal()" class="form-cancel-btn">Cancel</button>
+    </form>
+  </div>
+</div>
 
-    
-      <!-- Link Column
-      <ng-container matColumnDef="link">
-        <mat-header-cell *matHeaderCellDef>Link</mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <a [href]="element.link" target="_blank">{{ element.link || "N/A" }}</a>
-        </mat-cell>
-      </ng-container> -->
-    
-      <!-- Payment Status Column -->
-      <ng-container matColumnDef="paymentStatus">
-        <mat-header-cell *matHeaderCellDef>Payment Status</mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <mat-select [(value)]="element.paymentStatus">
-            <mat-option value="Paid">Paid</mat-option>
-            <mat-option value="Unpaid">Unpaid</mat-option>
-          </mat-select>
-        </mat-cell>
-      </ng-container>
-    
-      <!-- Payment Mode Column -->
-      <!-- <ng-container matColumnDef="paymentMode">
-        <mat-header-cell *matHeaderCellDef>Payment Mode</mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <mat-select [(value)]="element.paymentMode">
-            <mat-option *ngFor="let mode of paymentModes" [value]="mode">{{ mode }}</mat-option>
-          </mat-select>
-        </mat-cell>
-      </ng-container> -->
-      <ng-container matColumnDef="undo">
-        <mat-header-cell *matHeaderCellDef>Undo</mat-header-cell>
-        <mat-cell *matCellDef="let element" class="undo-cell">
-          <button mat-icon-button (click)="undoPaymentStatus(element)" [disabled]="element.paymentStatus !== 'Paid'">
-            <i class="fas fa-undo-alt"></i>
-          </button>
-        </mat-cell>
-      </ng-container>
-      
-      
-      
-      
-      <!-- Allocation Date Column -->
-      <ng-container matColumnDef="allocationDate">
-        <mat-header-cell *matHeaderCellDef>Allocation Date</mat-header-cell>
-        <mat-cell *matCellDef="let element">{{ element.allocationDate || "N/A" }}</mat-cell>
-      </ng-container>
-    
-      <!-- Allocation Time Column -->
-      <ng-container matColumnDef="allocationTime">
-        <mat-header-cell *matHeaderCellDef>Allocation Time</mat-header-cell>
-        <mat-cell *matCellDef="let element">{{ element.allocationTime || "N/A" }}</mat-cell>
-      </ng-container>
-    
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-    </mat-table>
-  
+<!-- Response Card -->
+<div class="response-card-container" *ngIf="isResponseCardVisible">
+  <div class="response-card">
+    <h4 class="response-message">{{ responseMessage }}</h4>
+    <button (click)="closeResponseCard()" class="response-ok-btn">OK</button>
+  </div>
+</div>
+
+
+<div class="filter-container">
+  <!-- Date Picker -->
+  <mat-form-field class="filter-item example-full-width">
+    <mat-label>Choose a date</mat-label>
+    <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate"     (ngModelChange)="fetchAllocatedLeads()"
+    />
+    <mat-hint>MM/DD/YYYY</mat-hint>
+    <mat-datepicker-toggle matIconSuffix [for]="picker">
+      <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+    </mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+
+  <!-- Paid Status Select -->
+  <!-- <mat-form-field class="filter-item example-full-width">
+    <mat-label>Paid Status</mat-label>
+    <mat-select [(ngModel)]="selectedPaidStatus" (selectionChange)="onFilterChange()">
+      <mat-option [value]="null">All</mat-option>
+      <mat-option [value]="'Paid'">Paid</mat-option>
+      <mat-option [value]="'Unpaid'">Unpaid</mat-option>
+    </mat-select>
+  </mat-form-field> -->
+</div>
+
+
+<div class="card-container">
+  <!-- Allocated Leads Card -->
+  <div class="card">
+    <!-- <div class="card-header"></div> -->
+    <div class="card-content">
+      <h3>Pending Leads</h3>
+      <h2><strong>{{completedCount}}/{{  allocatedLeadCounts }}</strong></h2>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-6 col-md-4">
+      <div class="card text-center paid-card">
+        <div class="card-body">
+          <h5 class="card-title">Paid</h5>
+          <p class="card-text display-6">{{completedCount}}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4">
+      <div class="card text-center unpaid-card">
+        <div class="card-body">
+          <h5 class="card-title">Unpaid</h5>
+          <p class="card-text display-6">{{ allocatedLeadCounts - completedCount }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<mat-table [dataSource]="dataSource" matSort class="custom-table mat-elevation-z8">
+  <!-- Serial Number Column -->
+  <ng-container matColumnDef="serialNumber">
+    <mat-header-cell *matHeaderCellDef class="serial-number-header">Sr No.</mat-header-cell>
+    <mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</mat-cell>
+  </ng-container>
+
+  <!-- Order ID Column -->
+  <ng-container matColumnDef="orderId">
+    <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
+    <mat-cell *matCellDef="let element">
+      <a
+        *ngIf="element.link"
+        [href]="element.link"
+        target="_blank"
+        rel="noopener noreferrer"
+        (click)="updatePaymentStatus(element)"
+        mat-raised-button
+        [color]="element.status === 'Completed' ? 'primary' : 'accent'"
+        [disabled]="element.status === 'Completed'"
+        matTooltip="{{ element.status === 'Completed' ? 'Already Paid' : 'Click to Pay' }}"
+        style="text-decoration: none; color: inherit; display: flex; justify-content: center; align-items: center; margin: auto;"
+      >
+        {{ element.link.slice(-4) }}
+      </a>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Payment Status Column -->
+  <ng-container matColumnDef="paymentStatus">
+    <mat-header-cell *matHeaderCellDef>Payment Status</mat-header-cell>
+    <mat-cell *matCellDef="let element">
+      <span>{{ element.status === 'Completed' ? 'Paid' : 'Unpaid' }}</span>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Undo Column -->
+  <ng-container matColumnDef="undo">
+    <mat-header-cell *matHeaderCellDef>Undo</mat-header-cell>
+    <mat-cell *matCellDef="let element" class="undo-cell">
+      <button mat-icon-button (click)="undoPaymentStatus(element)" [disabled]="element.status !== 'Completed'">
+        <i class="fas fa-undo-alt"></i>
+      </button>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>
+

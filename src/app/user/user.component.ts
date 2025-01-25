@@ -1,24 +1,35 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit ,Output,EventEmitter} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { FormsModule } from '@angular/forms'; // Import FormsModule
+import { FormsModule, ReactiveFormsModule ,FormGroup,Validators,FormBuilder} from '@angular/forms'; // Import FormsModule
 import { MatPaginatorModule } from '@angular/material/paginator'; // Import MatPaginatorModule
 import { MatTableModule } from '@angular/material/table'; // Import MatTableModule
 import { MatSortModule } from '@angular/material/sort'; // Import MatSortModule
 import { CommonModule } from '@angular/common';
-import { MatSelectModule } from '@angular/material/select';
+import { MatNativeDateModule, MatOption } from '@angular/material/core';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatTableDataSource } from '@angular/material/table'; // Import MatTableDataSource
 import { ViewChild } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'; // Import BreakpointObserver
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
+
+interface Order {
+  orderId: string;
+  link: string;
+  paymentStatus?: 'Paid' | 'Unpaid'; // Optional, will be used for UI tracking
+  status: 'Assign' | 'Completed'; // Use your existing status
+}
 
 @Component({
-  selector: 'app-user',
+  selector: 'app-users',
   standalone: true,
-  imports: [MatIconModule, MatCardModule, FormsModule,MatPaginatorModule,MatTableModule,MatSortModule,CommonModule,MatSelectModule,MatButtonModule,MatTooltipModule], // Include FormsModule here
+  imports: [MatIconModule, MatCardModule,ReactiveFormsModule, FormsModule,MatPaginatorModule,MatTableModule,MatSortModule,CommonModule,MatSelectModule,MatButtonModule,MatTooltipModule,MatCardModule,MatDatepickerModule, MatFormFieldModule,  MatInputModule,MatNativeDateModule], // Include FormsModule here
   templateUrl: './user.component.html',
   styleUrls: ['./user.component.scss']
 })
@@ -31,34 +42,97 @@ export class UserComponent implements OnInit {
   currentPage: number = 1;
   itemsPerPage: number = 10;
   totalRecords: number = 0;
-  allocatedLeadsCount: number = 0; // Updated to fetch dynamically
+  allocatedLeadCounts: number = 0;
   totalLeads: number = 0; // Total leads to calculate remaining leads
   remainingLeads: number = 0; // The remaining leads after allocation
+  selectedDate: Date = new Date(); // Default to the current date
+  selectedPaidStatus: string | null = null;
+  totalAllocatedLeads: number = 0; // New variable to store the total number of allocated leads
+  // leadIds: any[] = [];
+  completedCount: number = 0;
 
-  dataSource = new MatTableDataSource<any>(this.paginatedData);
+  paidCount: number = 0; // Initially set to 0
+  unpaidCount: number = 0; // Initially set to 0
+  dataSource = new MatTableDataSource<Order>([]); // Use the Order interface
+  orders: Order[] = []; // To store fetched orders
+    apiUrl = 'http://localhost:5000/api/allocated-leads';
+
+    @Output() closeModal = new EventEmitter<void>();
+    changePasswordForm: FormGroup;
+    isResponseCardVisible = false;
+    responseMessage = '';
+    isChangePasswordModalOpen = false;
+    oldPasswordVisible = false;
+    newPasswordVisible = false;
+
+  constructor(private fb: FormBuilder,private http: HttpClient, private breakpointObserver: BreakpointObserver) {
+    this.changePasswordForm = this.fb.group({
+      newPassword: ['', [Validators.required, Validators.minLength(6),Validators.maxLength(12),Validators.pattern('^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,12}$') ]],
+    });
+  }  
 
 
-  constructor(private http: HttpClient, private breakpointObserver: BreakpointObserver) {}
+
+  openChangePasswordModal() {
+    this.isChangePasswordModalOpen = true;
+  }
+
+  closeChangePasswordModal() {
+    this.isChangePasswordModalOpen = false;
+  }
+
+  onSubmit() {
+    if (this.changePasswordForm.valid) {
+      const {newPassword } = this.changePasswordForm.value;
+      const headers = new HttpHeaders({
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            });
+      this.http.put('http://localhost:5000/change-password', {newPassword}, {headers }).subscribe({
+        next: (res: any) => {
+          this.responseMessage = res.message || 'Password changed successfully.';
+          this.isResponseCardVisible = true;
+          this.isChangePasswordModalOpen = false;
+        },
+        error: (err) => {
+          this.responseMessage = err.error?.message || 'An error occurred.';
+          this.isResponseCardVisible = true;
+        },
+      });
+    }
+  }
+
+  togglePasswordVisibility(field: string) {
+    if (field === 'newPassword') {
+      this.newPasswordVisible = !this.newPasswordVisible;
+    }
+  }
+
+  closeResponseCard() {
+    this.isResponseCardVisible = false;
+    this.closeModal.emit();
+  }
+
+
 
   ngOnInit(): void {
-    
-    this.isDarkMode = localStorage.getItem('theme') === 'dark'; 
-    this.username = localStorage.getItem('username') || ''; 
+    this.isDarkMode = localStorage.getItem('theme') === 'dark';
+    this.username = localStorage.getItem('username') || '';
     this.initials = this.getInitials(this.username); // Generate initials from username
     this.fetchAllocatedLeads(); // Fetch allocated leads count
   
-     // Watch for screen size changes
-     this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
+    // Initialize displayedColumns
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
       if (result.matches) {
-        // On mobile, show only 'orderId' and 'undo' columns
-        this.displayedColumns = ['orderId', 'undo'];
+        // On mobile, show 'serialNumber', 'orderId', and 'undo' columns
+        this.displayedColumns = ['serialNumber', 'orderId', 'undo'];
       } else {
         // On larger screens, show all columns
-        this.displayedColumns = ['orderId', 'undo', 'paymentStatus', 'allocationDate', 'allocationTime'];
+        this.displayedColumns = ['serialNumber', 'orderId', 'paymentStatus', 'undo'];
       }
     });
-  
   }
+  
+  
 
   getInitials(name: string): string {
     return name
@@ -71,6 +145,8 @@ export class UserComponent implements OnInit {
 
   downloadLeads() {
     // Implement logic for downloading leads (e.g., triggering a download of a file)
+  }
+  onFilterChange(): void {
   }
 
  
@@ -87,7 +163,7 @@ export class UserComponent implements OnInit {
 
   // Pagination related variables
 
-  displayedColumns: string[] = ['orderId', 'undo', 'paymentStatus', 'allocationDate', 'allocationTime'];
+  displayedColumns: string[] = ['orderId', 'undo', 'paymentStatus'];
 
 
   paymentModes: string[] = ['PhonepeW', 'Upi'];
@@ -97,82 +173,49 @@ export class UserComponent implements OnInit {
     console.log(`Payment mode updated for Order ID ${element.orderId}:`, element.paymentMode);
     // Additional logic like saving the updated value to the backend can go here
   }
+  
   fetchAllocatedLeads(): void {
-    const token = localStorage.getItem('token'); // Retrieve the token
-    const loggedInUserId = localStorage.getItem('userId'); // Retrieve the userId from localStorage
+    const token = localStorage.getItem('token');
+    const loggedInUserId = localStorage.getItem('userId');
   
-    if (!token) {
-      console.error('Token not found in localStorage.');
-      return;
-    }
-  
-    if (!loggedInUserId) {
-      console.error('User ID not found in localStorage.');
+    if (!token || !loggedInUserId) {
+      console.error('Token or User ID not found in localStorage.');
       return;
     }
   
     const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`, // Include the token
+      Authorization: `Bearer ${token}`,
     });
+  
+    const params: any = {};
+    if (this.selectedDate) {
+      const localDate = new Date(this.selectedDate.getTime() - this.selectedDate.getTimezoneOffset() * 60000)
+        .toISOString()
+        .split('T')[0];
+      params.date = localDate;
+    }
   
     this.http
-      .get<any>('  http://localhost:5000/api/lead-allocations', { headers })
+      .get<{ allocatedLeadCounts: number; completedCount: number; orders: Order[] }>(
+        this.apiUrl,
+        { headers, params }
+      )
       .subscribe({
         next: (response) => {
-          console.log('Lead Allocations Response:', response);
+          this.allocatedLeadCounts = response.allocatedLeadCounts;
+          this.completedCount = response.completedCount; // Store the completed count
+          this.orders = response.orders.map(order => {
+            // Map orders to set paymentStatus based on the status
+            order.paymentStatus = order.status === 'Completed' ? 'Paid' : 'Unpaid';
+            return order;
+          });
   
-          const currentMember = response.find(
-            (alloc: any) => alloc.memberId._id === loggedInUserId
-          );
-  
-          if (currentMember) {
-            this.leadIds = currentMember.leadIds || [];
-            const totalAllocatedLeads = this.leadIds.length;
-            const completedLeads = response.completedLeadsCount || 0;
-  
-            // Subtract completed leads from total allocated leads
-            this.allocatedLeadsCount = totalAllocatedLeads - completedLeads;
-            this.fetchOrders(); // Fetch orders based on leads
-          } else {
-            console.warn('No allocations found for the logged-in user.');
-          }
+          // Update the dataSource for the table
+          this.dataSource.data = this.orders;
+          console.log('Allocated Leads:', response);
         },
-        error: (error) => {
-          console.error('Error fetching allocated leads:', error);
-        },
+        error: (error) => console.error('Error fetching allocated leads:', error),
       });
-  }
-  
-  
-  fetchOrders(): void {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    });
-  
-    const leadIdsQuery = this.leadIds.join(',');
-    const url = `  http://localhost:5000/api/orders?leadIds=${leadIdsQuery}`;
-  
-    this.http.get<any>(url, { headers }).subscribe({
-      next: (response) => {
-        this.paginatedData = response.data.map((order: any) => {
-          const updatedAt = order.updatedAt ? new Date(order.updatedAt) : null;
-          return {
-            orderId: order.orderId || 'N/A',
-            link: order.link || '#', // Fallback to '#' if no link is provided
-            paymentStatus: order.paymentStatus || 'Unpaid',
-            paymentMode: order.paymentModeBy || 'N/A', // Adjusted for 'paymentModeBy'
-            allocationDate: updatedAt ? updatedAt.toLocaleDateString() : 'N/A', // Format to show date
-            allocationTime: updatedAt ? updatedAt.toLocaleTimeString() : 'N/A', // Format to show time
-          };
-        });
-  
-        this.dataSource.data = this.paginatedData;
-        console.log('Orders Response:', response);
-      },
-      error: (error) => {
-        console.error('Error fetching orders:', error);
-      },
-    });
   }
   
   
@@ -181,31 +224,27 @@ export class UserComponent implements OnInit {
     leadId: '',           // Populate this based on the specific lead/task
   };
   
-  updatePaymentStatus(order: any): void {
-    if (order.paymentStatus === 'Paid') {
-      return; // Prevent multiple updates for already paid orders
-    }
+  updatePaymentStatus(order: Order): void {
+    if (order.paymentStatus === 'Paid') return;
   
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
   
-    const payload = {
-      orderId: order.orderId,
-      paymentStatus: 'Paid',
-    };
+    const payload = { orderId: order.orderId };
   
     this.http
-      .patch(' http://localhost:5000/api/orders/payment-status', payload, { headers })
+      .patch('http://localhost:5000/api/update-order-status', payload, { headers })
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           console.log('Payment status updated:', response);
-  
-          // Update the local table data to reflect the status change
-          order.paymentStatus = 'Paid';
-          this.allocatedLeadsCount--; // Decrease leads remaining when an order is marked as paid
-
           
+          // Update local UI state
+          order.paymentStatus = 'Paid'; // Mark as Paid
+          order.status = 'Completed'; // Update status to 'Completed'
+  
+          // Update the counts if needed
+          this.completedCount = response.completedCount;
         },
         error: (error) => {
           console.error('Error updating payment status:', error);
@@ -213,7 +252,7 @@ export class UserComponent implements OnInit {
       });
   }
   
-  undoPaymentStatus(order: any): void {
+  undoPaymentStatus(order: Order): void {
     if (order.paymentStatus !== 'Paid') {
       return; // Only allow undo if the payment status is "Paid"
     }
@@ -222,22 +261,20 @@ export class UserComponent implements OnInit {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
   
-    const payload = {
-      orderId: order.orderId,
-      paymentStatus: 'Unpaid',
-    };
+    const payload = { orderId: order.orderId };
   
     this.http
-      .patch(' http://localhost:5000/api/orders/payment-status', payload, { headers })
+      .patch('http://localhost:5000/api/revert-order-status', payload, { headers })
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           console.log('Payment status reverted:', response);
   
-          // Update the local table data to reflect the status change
-          order.paymentStatus = 'Unpaid';
-
-          this.allocatedLeadsCount++; // Increase leads remaining when the status is reverted
-
+          // Update local UI state
+          order.paymentStatus = 'Unpaid'; // Mark as Unpaid
+          order.status = 'Assign'; // Revert status to 'Assign'
+  
+          // Update the counts if needed
+          this.completedCount = response.completedCount;
         },
         error: (error) => {
           console.error('Error reverting payment status:', error);
@@ -245,13 +282,10 @@ export class UserComponent implements OnInit {
       });
   }
   
-  
-  
 
   onPageChange(event: any) {
     this.currentPage = event.pageIndex + 1;
     this.itemsPerPage = event.pageSize;
-    this.fetchOrders(); // Fetch paginated data on page change
   }
 }
 
